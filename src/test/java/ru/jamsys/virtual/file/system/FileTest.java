@@ -29,4 +29,10 @@ public class FileTest extends TestCase {
         File file = new File("/hello/world/1.txt", FileLoaderFactory.fromString("Hello world", "UTF-8"));
         Assert.assertEquals("#1", "SGVsbG8gd29ybGQ=", file.getBase64());
     }
+
+    public void testFromFileSystem() throws UnsupportedEncodingException {
+        File file = new File("/hello/world/1.txt", FileLoaderFactory.fromFileSystem("pom.xml"));
+        Assert.assertTrue("#1", file.getString("UTF-8").length() > 0);
+    }
+
 }
