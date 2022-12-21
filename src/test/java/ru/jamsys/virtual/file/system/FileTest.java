@@ -7,6 +7,7 @@ import org.springframework.boot.SpringApplication;
 import ru.jamsys.App;
 import ru.jamsys.UtilFile;
 import ru.jamsys.component.Security;
+import ru.jamsys.component.VirtualFileSystem;
 import ru.jamsys.virtual.file.system.view.FileViewKeyStore;
 
 import java.io.UnsupportedEncodingException;
@@ -32,6 +33,9 @@ public class FileTest {
 
         file = new File("1.txt", () -> null);
         Assertions.assertEquals("/1.txt", file.getAbsolutePath(), "Полный путь");
+
+        file = new File("test/1.txt", () -> null);
+        Assertions.assertEquals("/test/1.txt", file.getAbsolutePath(), "Полный путь");
     }
 
     @Test
@@ -68,7 +72,15 @@ public class FileTest {
         Assertions.assertEquals("Hello world", view.getSecret("h1"), "#1");
 
         UtilFile.remove("one.jks");
+    }
 
+    @Test void testComponent(){
+        File file = new File("hello/world/1.txt", FileLoaderFactory.fromString("Hello world", "UTF-8"));
+        VirtualFileSystem virtualFileSystem = App.context.getBean(VirtualFileSystem.class);
+        virtualFileSystem.add(file);
+        File file1 = virtualFileSystem.get("/hello/world/1.txt");
+
+        Assertions.assertEquals(file, file1, "Файлы не равны");
 
     }
 
