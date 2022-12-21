@@ -2,6 +2,7 @@ package ru.jamsys.virtual.file.system;
 
 import lombok.Getter;
 import lombok.Setter;
+import ru.jamsys.ConsumerThrowing;
 import ru.jamsys.SupplierThrowing;
 import ru.jamsys.UtilBase64;
 import ru.jamsys.virtual.file.system.view.FileView;
@@ -9,7 +10,6 @@ import ru.jamsys.virtual.file.system.view.FileView;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public class File {
@@ -27,20 +27,42 @@ public class File {
     protected volatile long timeRemoveCache; //Время когда надо удалить кеш из памяти
 
     protected SupplierThrowing<byte[]> loader = () -> null;
+
+    @Setter
+    private ConsumerThrowing<byte[]> saver = null;
+
     private volatile byte[] fileData;
 
-    Map<Class<FileView>, FileView> view = new HashMap<>();
+    Map<Class<? extends FileView>, FileView> view = new HashMap<>();
+
+    Map<String, Object> prop = new HashMap<>();
+
+    public void setProp(String key, Object value) {
+        prop.put(key, value);
+    }
+
+    public <T> T getProp(String key, T def) {
+        return prop.containsKey(key) ? (T) prop.get(key) : def;
+    }
+
+    public <T> T getProp(String key) {
+        return (T) prop.get(key);
+    }
 
     @Getter
     private String absolutePath = null;
 
-    public void setView(Class<FileView> t) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    private void setView(Class<? extends FileView> t) throws Exception {
         FileView e = t.getDeclaredConstructor().newInstance();
         e.set(this);
         view.put(t, e);
     }
 
-    public <T extends FileView> T getView(Class<T> t) {
+    public <T extends FileView> T getView(Class<T> t) throws Exception {
+        if (!view.containsKey(t)) {
+            setView(t);
+        }
+        init();
         return (T) view.get(t);
     }
 
@@ -74,7 +96,11 @@ public class File {
         this.extension = split[split.length - 1].trim();
         this.fileName = name.substring(0, name.length() - this.extension.length() - 1);
         this.folder = "/" + String.join("/", items);
-        this.absolutePath = folder + "/" + fileName + "." + extension;
+        if (folder.equals("/")) {
+            this.absolutePath = "/" + fileName + "." + extension;
+        } else {
+            this.absolutePath = folder + "/" + fileName + "." + extension;
+        }
     }
 
     public void reload() {
@@ -87,12 +113,12 @@ public class File {
         }
     }
 
-    public byte[] get() {
+    private void init() {
         if (fileData == null) {
             try {
                 fileData = loader.get();
-                Set<Class<FileView>> classes = view.keySet();
-                for (Class<FileView> c : classes) {
+                Set<Class<? extends FileView>> classes = view.keySet();
+                for (Class<? extends FileView> c : classes) {
                     view.get(c).createCache();
                 }
             } catch (Exception e) {
@@ -100,19 +126,32 @@ public class File {
             }
         }
         restoreTimeRemoveCache();
+    }
+
+    public byte[] getBytes() {
+        init();
         return fileData;
     }
 
     public String getString(String charset) throws UnsupportedEncodingException {
-        return new String(get(), charset);
+        return new String(getBytes(), charset);
     }
 
     public InputStream getInputStream() {
-        return new ByteArrayInputStream(get());
+        return new ByteArrayInputStream(getBytes());
     }
 
     public String getBase64() {
-        return UtilBase64.base64Encode(get(), true);
+        return UtilBase64.base64Encode(getBytes(), true);
+    }
+
+    public void save(byte[] data) throws Exception {
+        if (saver == null) {
+            throw new Exception("Consumer saver not found. File: " + getAbsolutePath());
+        }
+        fileData = data;
+        saver.accept(data);
+        //reload(); //Сохранение не должно вызывать перезагрузку, так как в памяти должны быть внесены изменения, это только для Supplier загрузчика
     }
 
 }

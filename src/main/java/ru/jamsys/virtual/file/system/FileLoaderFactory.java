@@ -1,10 +1,12 @@
 package ru.jamsys.virtual.file.system;
 
-import ru.jamsys.SupplierThrowing;
-import ru.jamsys.UtilBase64;
-import ru.jamsys.UtilFile;
+import ru.jamsys.*;
+import ru.jamsys.component.Security;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.charset.Charset;
+import java.security.KeyStore;
 
 
 public class FileLoaderFactory {
@@ -19,6 +21,27 @@ public class FileLoaderFactory {
 
     public static SupplierThrowing<byte[]> fromString(String data, String charset) {
         return () -> data.getBytes(Charset.forName(charset));
+    }
+
+    public static SupplierThrowing<byte[]> createFile(String path, String data, String charset) throws IOException {
+        UtilFile.writeBytes(path, data.getBytes(charset), FileWriteOptions.CREATE_OR_REPLACE);
+        return fromFileSystem(path);
+    }
+
+    public static SupplierThrowing<byte[]> createKeyStore(String path, String securityKey) throws Exception {
+        KeyStore ks = KeyStore.getInstance("JCEKS");
+        Security security = App.context.getBean(Security.class);
+        String pass = security.get(securityKey);
+
+        if (pass == null) {
+            throw new Exception("Пароль не найден по ключу: " + securityKey);
+        }
+        ks.load(null, pass.toCharArray());
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        ks.store(byteArrayOutputStream, pass.toCharArray());
+        UtilFile.writeBytes(path, byteArrayOutputStream.toByteArray(), FileWriteOptions.CREATE_OR_REPLACE);
+        return fromFileSystem(path);
     }
 
 }
