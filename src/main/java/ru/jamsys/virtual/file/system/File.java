@@ -41,10 +41,12 @@ public class File {
         prop.put(key, value);
     }
 
+    @SuppressWarnings({"unused", "unchecked"})
     public <T> T getProp(String key, T def) {
         return prop.containsKey(key) ? (T) prop.get(key) : def;
     }
 
+    @SuppressWarnings({"unused", "unchecked"})
     public <T> T getProp(String key) {
         return (T) prop.get(key);
     }
@@ -55,9 +57,10 @@ public class File {
     private void setView(Class<? extends FileView> t) throws Exception {
         FileView e = t.getDeclaredConstructor().newInstance();
         e.set(this);
-        view.put(t, e);
+        view.putIfAbsent(t, e);
     }
 
+    @SuppressWarnings("unchecked")
     public <T extends FileView> T getView(Class<T> t) throws Exception {
         if (!view.containsKey(t)) {
             setView(t);
@@ -82,7 +85,7 @@ public class File {
     }
 
     private void parsePath(String path) {
-        ArrayList<String> items = new ArrayList(Arrays.asList(path.trim().split("/")));
+        ArrayList<String> items = new ArrayList<>(Arrays.asList(path.trim().split("/")));
         while (true) {
             String s = items.get(0);
             if (s == null || s.equals("") || s.equals("..")) {
@@ -103,7 +106,8 @@ public class File {
         }
     }
 
-    public void reload() {
+    @SuppressWarnings("unused")
+    public void reset() {
         fileData = null;
     }
 

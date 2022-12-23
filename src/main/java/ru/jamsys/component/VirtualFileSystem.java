@@ -1,6 +1,8 @@
 package ru.jamsys.component;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import ru.jamsys.AbstractCoreComponent;
 import ru.jamsys.virtual.file.system.File;
 
 import java.util.List;
@@ -9,7 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Component
-public class VirtualFileSystem {
+@Lazy
+public class VirtualFileSystem extends AbstractCoreComponent {
 
     List<File> list = new CopyOnWriteArrayList<>();
     Map<String, File> map = new ConcurrentHashMap<>();
@@ -27,4 +30,8 @@ public class VirtualFileSystem {
         return map.get(filePath);
     }
 
+    @Override
+    public void flushStatistic() {
+
+    }
 }
