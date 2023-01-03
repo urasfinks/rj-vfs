@@ -32,15 +32,15 @@ public class FileLoaderFactory {
     public static SupplierThrowing<byte[]> createKeyStore(String path, String securityKey) throws Exception {
         KeyStore ks = KeyStore.getInstance("JCEKS");
         Security security = App.context.getBean(Security.class);
-        String pass = security.get(securityKey);
+        char[] pass = security.get(securityKey);
 
         if (pass == null) {
             throw new Exception("Пароль не найден по ключу: " + securityKey);
         }
-        ks.load(null, pass.toCharArray());
+        ks.load(null, pass);
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        ks.store(byteArrayOutputStream, pass.toCharArray());
+        ks.store(byteArrayOutputStream, pass);
         UtilFile.writeBytes(path, byteArrayOutputStream.toByteArray(), FileWriteOptions.CREATE_OR_REPLACE);
         return fromFileSystem(path);
     }

@@ -61,7 +61,9 @@ public class FileTest {
     @Test
     public void testKeyStore() throws Exception {
         Security security = App.context.getBean(Security.class);
-        security.add("test", "12345");
+        security.init("12345".toCharArray());
+        security.add("test", "12345".toCharArray());
+
         File file = new File("/test.p12", FileLoaderFactory.createKeyStore("one.jks", "test"));
         file.setSaver(FileSaverFactory.writeFile("one.jks"));
         file.setProp("securityKey", "test");
