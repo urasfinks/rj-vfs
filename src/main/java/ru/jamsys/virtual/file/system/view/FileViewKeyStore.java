@@ -44,13 +44,13 @@ public class FileViewKeyStore implements FileView {
 
     @Override
     public void createCache() {
-        String pass = security.get(securityKey);
+        char[] pass = security.get(securityKey);
         if (pass == null) {
             new Exception("Пароль не найден по ключу: " + file.getAbsolutePath()).printStackTrace();
         } else {
             try (InputStream stream = file.getInputStream()) {
                 keyStore = KeyStore.getInstance(typeKeyStorage);
-                keyStore.load(stream, pass.toCharArray());
+                keyStore.load(stream, pass);
             } catch (Exception e) {
                 keyStore = null;
                 e.printStackTrace();
@@ -66,9 +66,9 @@ public class FileViewKeyStore implements FileView {
         String typeManager = "SunX509";
         if (keyManagers == null) {
             try {
-                String pass = security.get(securityKey);
+                char[] pass = security.get(securityKey);
                 KeyManagerFactory kmf = KeyManagerFactory.getInstance(typeManager);
-                kmf.init(keyStore, pass.toCharArray());
+                kmf.init(keyStore, pass);
                 keyManagers = kmf.getKeyManagers();
             } catch (Exception e) {
                 e.printStackTrace();
