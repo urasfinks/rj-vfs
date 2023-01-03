@@ -8,7 +8,6 @@ import ru.jamsys.App;
 import ru.jamsys.UtilFile;
 import ru.jamsys.component.Security;
 import ru.jamsys.component.VirtualFileSystem;
-import ru.jamsys.virtual.file.system.view.FileViewKeyStore;
 
 import java.io.UnsupportedEncodingException;
 
@@ -66,11 +65,6 @@ public class FileTest {
         File file = new File("/test.p12", FileLoaderFactory.createKeyStore("one.jks", "test"));
         file.setSaver(FileSaverFactory.writeFile("one.jks"));
         file.setProp("securityKey", "test");
-        FileViewKeyStore view = file.getView(FileViewKeyStore.class);
-        view.setSecret("h1", "Hello world");
-
-        Assertions.assertEquals("Hello world", view.getSecret("h1"), "#1");
-
         UtilFile.remove("one.jks");
     }
 

@@ -59,26 +59,6 @@ public class FileViewKeyStore implements FileView {
         sslSocketFactory.clear();
     }
 
-    public void setSecret(String alias, String value) throws Exception {
-        String pass = security.get(securityKey);
-        KeyStore.PasswordProtection keyStorePP = new KeyStore.PasswordProtection(pass.toCharArray());
-        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBE");
-        SecretKey generatedSecret = factory.generateSecret(new PBEKeySpec(value.toCharArray(), "any".getBytes(), 13));
-        keyStore.setEntry(alias, new KeyStore.SecretKeyEntry(generatedSecret), keyStorePP);
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        keyStore.store(byteArrayOutputStream, pass.toCharArray());
-        file.save(byteArrayOutputStream.toByteArray());
-    }
-
-    public String getSecret(String alias) throws Exception {
-        String pass = security.get(securityKey);
-        KeyStore.PasswordProtection keyStorePP = new KeyStore.PasswordProtection(pass.toCharArray());
-        KeyStore.SecretKeyEntry ske = (KeyStore.SecretKeyEntry) keyStore.getEntry(alias, keyStorePP);
-        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBE");
-        PBEKeySpec keySpec = (PBEKeySpec) factory.getKeySpec(ske.getSecretKey(), PBEKeySpec.class);
-        return new String(keySpec.getPassword());
-    }
-
     public SSLSocketFactory getSslSocketFactory(String sslContextType) {
         if (keyStore == null) {
             return null;

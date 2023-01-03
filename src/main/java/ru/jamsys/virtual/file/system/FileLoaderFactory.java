@@ -23,6 +23,7 @@ public class FileLoaderFactory {
         return () -> data.getBytes(Charset.forName(charset));
     }
 
+    @SuppressWarnings("unused")
     public static SupplierThrowing<byte[]> createFile(String path, String data, String charset) throws IOException {
         UtilFile.writeBytes(path, data.getBytes(charset), FileWriteOptions.CREATE_OR_REPLACE);
         return fromFileSystem(path);
