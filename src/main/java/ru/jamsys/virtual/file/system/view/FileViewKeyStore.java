@@ -8,9 +8,6 @@ import ru.jamsys.virtual.file.system.File;
 import javax.net.ssl.*;
 import java.io.InputStream;
 import java.security.KeyStore;
-import java.security.SecureRandom;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 
 public class FileViewKeyStore implements FileView {
@@ -19,7 +16,6 @@ public class FileViewKeyStore implements FileView {
     private String securityKey;
     private Security security;
     private File file = null;
-    private final Map<String, SSLSocketFactory> sslSocketFactory = new ConcurrentHashMap<>();
 
     @Getter
     private KeyManager[] keyManagers;
@@ -53,16 +49,12 @@ public class FileViewKeyStore implements FileView {
                     e.printStackTrace();
                 }
             }
-            sslSocketFactory.clear();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public SSLSocketFactory getSslSocketFactory(String sslContextType) {
-        if (keyStore == null) {
-            return null;
-        }
+    void preCache() {
         String typeManager = "SunX509";
         if (keyManagers == null) {
             try {
@@ -83,16 +75,6 @@ public class FileViewKeyStore implements FileView {
                 e.printStackTrace();
             }
         }
-        if (!sslSocketFactory.containsKey(sslContextType)) {
-            try {
-                SSLContext ssl = SSLContext.getInstance(sslContextType);
-                ssl.init(keyManagers, trustManagers, new SecureRandom());
-                sslSocketFactory.put(sslContextType, ssl.getSocketFactory());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return sslSocketFactory.get(sslContextType);
     }
 
 }
