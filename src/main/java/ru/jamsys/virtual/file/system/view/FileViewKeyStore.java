@@ -5,11 +5,7 @@ import ru.jamsys.App;
 import ru.jamsys.component.Security;
 import ru.jamsys.virtual.file.system.File;
 
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
 import javax.net.ssl.*;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.SecureRandom;
@@ -44,19 +40,23 @@ public class FileViewKeyStore implements FileView {
 
     @Override
     public void createCache() {
-        char[] pass = security.get(securityKey);
-        if (pass == null) {
-            new Exception("Пароль не найден по ключу: " + file.getAbsolutePath()).printStackTrace();
-        } else {
-            try (InputStream stream = file.getInputStream()) {
-                keyStore = KeyStore.getInstance(typeKeyStorage);
-                keyStore.load(stream, pass);
-            } catch (Exception e) {
-                keyStore = null;
-                e.printStackTrace();
+        try {
+            char[] pass = security.get(securityKey);
+            if (pass == null) {
+                new Exception("Пароль не найден по ключу: " + file.getAbsolutePath()).printStackTrace();
+            } else {
+                try (InputStream stream = file.getInputStream()) {
+                    keyStore = KeyStore.getInstance(typeKeyStorage);
+                    keyStore.load(stream, pass);
+                } catch (Exception e) {
+                    keyStore = null;
+                    e.printStackTrace();
+                }
             }
+            sslSocketFactory.clear();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        sslSocketFactory.clear();
     }
 
     public SSLSocketFactory getSslSocketFactory(String sslContextType) {

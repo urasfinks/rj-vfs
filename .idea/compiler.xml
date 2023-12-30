@@ -10,8 +10,5 @@
         <module name="rj-vfs" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="rj-vfs" target="1.8" />
-    </bytecodeTargetLevel>
   </component>
 </project>
