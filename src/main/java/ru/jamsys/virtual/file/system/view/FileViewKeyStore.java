@@ -12,6 +12,12 @@ import java.security.KeyStore;
 
 public class FileViewKeyStore implements FileView {
 
+    public enum prop {
+        TYPE,
+        SECURITY_KEY,
+        TRUST_MANAGER
+    }
+
     private String typeKeyStorage;
     private String securityKey;
     private Security security;
@@ -30,8 +36,9 @@ public class FileViewKeyStore implements FileView {
     public void set(File file) {
         this.file = file;
         security = App.context.getBean(Security.class);
-        typeKeyStorage = file.getProp("type", "JCEKS");
-        securityKey = file.getProp("securityKey", file.getAbsolutePath());
+        typeKeyStorage = file.getProp(prop.TYPE.name(), "JCEKS");
+        securityKey = file.getProp(prop.SECURITY_KEY.name(), file.getAbsolutePath());
+        trustManagers = file.getProp(prop.TRUST_MANAGER.name(), null);
     }
 
     @Override
@@ -55,11 +62,10 @@ public class FileViewKeyStore implements FileView {
     }
 
     void preCache() {
-        String typeManager = "SunX509";
         if (keyManagers == null) {
             try {
                 char[] pass = security.get(securityKey);
-                KeyManagerFactory kmf = KeyManagerFactory.getInstance(typeManager);
+                KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
                 kmf.init(keyStore, pass);
                 keyManagers = kmf.getKeyManagers();
             } catch (Exception e) {
@@ -68,7 +74,7 @@ public class FileViewKeyStore implements FileView {
         }
         if (trustManagers == null) {
             try {
-                TrustManagerFactory tmf = TrustManagerFactory.getInstance(typeManager);
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
                 tmf.init(keyStore);
                 trustManagers = tmf.getTrustManagers();
             } catch (Exception e) {
