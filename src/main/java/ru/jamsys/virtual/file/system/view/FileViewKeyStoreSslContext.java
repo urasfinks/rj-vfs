@@ -14,11 +14,10 @@ public class FileViewKeyStoreSslContext extends FileViewKeyStore {
         if (super.getKeyStore() == null) {
             return null;
         }
-        preCache();
         if (!sslContext.containsKey(sslContextType)) {
             try {
                 SSLContext ssl = SSLContext.getInstance(sslContextType);
-                ssl.init(super.getKeyManagers(), super.getTrustManagers(), new SecureRandom());
+                ssl.init(super.getKeyManagers(), super.getTrustManager().getListTrustManager(), new SecureRandom());
                 sslContext.put(sslContextType, ssl);
             } catch (Exception e) {
                 e.printStackTrace();

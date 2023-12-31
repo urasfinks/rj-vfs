@@ -37,6 +37,10 @@ public class File {
 
     Map<String, Object> prop = new HashMap<>();
 
+    public boolean isProp(String key) {
+        return prop.containsKey(key);
+    }
+
     public void setProp(String key, Object value) {
         prop.put(key, value);
     }
@@ -60,7 +64,7 @@ public class File {
         view.putIfAbsent(t, e);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unused", "unchecked"})
     public <T extends FileView> T getView(Class<T> t) throws Exception {
         if (!view.containsKey(t)) {
             setView(t);
@@ -69,7 +73,7 @@ public class File {
         return (T) view.get(t);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "unused"})
     public <T extends FileView> T getView(Class<T> t, Object... props) throws Exception {
         for (int i = 0; i < props.length; i += 2) {
             setProp(props[i].toString(), props[i + 1]);
@@ -100,7 +104,7 @@ public class File {
         ArrayList<String> items = new ArrayList<>(Arrays.asList(path.trim().split("/")));
         while (true) {
             String s = items.get(0);
-            if (s == null || s.equals("") || s.equals("..")) {
+            if (s == null || s.isEmpty() || s.equals("..")) {
                 items.remove(0);
             } else {
                 break;
@@ -161,6 +165,7 @@ public class File {
         return UtilBase64.base64Encode(getBytes(), true);
     }
 
+    @SuppressWarnings("unused")
     public void save(byte[] data) throws Exception {
         if (saver == null) {
             throw new Exception("Consumer saver not found. File: " + getAbsolutePath());

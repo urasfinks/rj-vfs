@@ -8,17 +8,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings("unused")
 public class FileViewKeyStoreSslSocketFactory extends FileViewKeyStore {
+
     private final Map<String, SSLSocketFactory> sslSocketFactory = new ConcurrentHashMap<>();
 
     public SSLSocketFactory getSslSocketFactory(String sslContextType) {
         if (super.getKeyStore() == null) {
             return null;
         }
-        super.preCache();
         if (!sslSocketFactory.containsKey(sslContextType)) {
             try {
                 SSLContext ssl = SSLContext.getInstance(sslContextType);
-                ssl.init(super.getKeyManagers(), super.getTrustManagers(), new SecureRandom());
+                ssl.init(super.getKeyManagers(), super.getTrustManager().getListTrustManager(), new SecureRandom());
                 sslSocketFactory.put(sslContextType, ssl.getSocketFactory());
             } catch (Exception e) {
                 e.printStackTrace();
