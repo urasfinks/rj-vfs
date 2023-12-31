@@ -69,6 +69,18 @@ public class File {
         return (T) view.get(t);
     }
 
+    @SuppressWarnings("unchecked")
+    public <T extends FileView> T getView(Class<T> t, Object... props) throws Exception {
+        for (int i = 0; i < props.length; i += 2) {
+            setProp(props[i].toString(), props[i + 1]);
+        }
+        if (!view.containsKey(t)) {
+            setView(t);
+        }
+        init();
+        return (T) view.get(t);
+    }
+
     public File(String path, SupplierThrowing<byte[]> loader) {
         init(path, loader);
     }
