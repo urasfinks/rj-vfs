@@ -33,12 +33,7 @@ public class FileLoaderFactory {
         KeyStore ks = KeyStore.getInstance("JCEKS");
         Security security = App.context.getBean(Security.class);
         char[] pass = security.get(securityKey);
-
-        if (pass == null) {
-            throw new Exception("Пароль не найден по ключу: " + securityKey);
-        }
         ks.load(null, pass);
-
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         ks.store(byteArrayOutputStream, pass);
         UtilFile.writeBytes(path, byteArrayOutputStream.toByteArray(), FileWriteOptions.CREATE_OR_REPLACE);
